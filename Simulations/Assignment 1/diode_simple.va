@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+model diode(anode,cathode);
+  inout anode,cathode;    //to declare is input output
+  electrical anode,cathode; //to declare it as an electrical quantity
+  electrical X1;  // intermediate node for series resistance
+  
+  parameter real Vt = 0.0259; // at T=300K
+  parameter real I0 = 3.756157744846386e-12; // low injection reverse sat current
+  parameter real n1 = 1.209069478377139; // low injection ideality factor
+  parameter real r  = 50; // series resistance
+  
+analog begin
+    real I1;  //variable declaration
+    I1  = I0*(exp(V(anode,X1)/(n1*Vt))-1);  //diode current
+    I(anode,X1) <+  I1; //loading diode to the circuit
+    I(X1,cathode) <+  V(X1,cathode)/r;  //loading the resistor in the circuit
+    
+end
+endmodule    

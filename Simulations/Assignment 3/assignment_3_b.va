@@ -1,0 +1,47 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+module intrinsic_semiconductor(a,c):
+  inout a,c;
+  electrical a,c;
+  
+  parameter real q  = 1.6e-19; //electronic charge
+  parameter real un = 1500;  //mobility of electron
+  parameter real up = 500;  //mobility of hole
+  parameter real epsilon_r = 11.9 ;//relative permeability
+  parameter real epsilon = 8.85e-14;
+  parameter real T = 300; //temperature
+  parameter real Nc = 2.8e19; //
+  parameter real Nv = 1e19; //
+  parameter real sqrt_Nc_Nv = 3.22e+15; //sqrt of NcNv/(T)^1.5
+  parameter real A=10e-8;
+  parameter real tp=1e-6;
+  parameter real tn=1e-6;
+  parameter real Eg = 1.12;  //band gap energy difference
+  parameter real k  = 1.38e-23;  //Boltzmann constant
+  parameter real Nd =1e+19;
+  parameter real Na =1e+19;
+  parameter real Ec_Ed = 0.045; //energy difference
+  parameter real R_ser = 1e-3;//Series resistance
+  parameter real Vt = 0.0259;
+  parameter real gop=1e18;//photo generation
+  parameter real xp0 = 10e-6;//width in p region without bias
+  parameter real w=1e-6;//instrinsic layer width
+  
+analog begin
+    
+    real V_bi,ni,xn,w0,ln,lp,Il,I0;
+    ni=sqrt_Nc_Nv*exp(-Eg/2*k*T)*pow(T,1.5);//variation of ni with temperature
+    V_bi=Vt*ln((Na*Nd)/(ni*ni));//variation of v_built-in
+    xn0=xp0*Na/Nd;//change of depletion width
+    lp=pow((up*Vt*tp),0.5); //diffusion length
+    ln=pow((un*Vt*tn),0.5);//diffusion length
+    Il=A*q*gop*(ln+lp+w); //current due to light
+    I0=A*q*((pow(up*Vt/tp,0.5)*ni*ni/Nd)+(pow(un*Vt/tn,0.5)*ni*ni/Na));//diode  leakage current
+    I(a,c)<+ I0*exp((V(a,c)/Vt)-1)-Il;
+
+end
+endmodule
+    
+    
+  

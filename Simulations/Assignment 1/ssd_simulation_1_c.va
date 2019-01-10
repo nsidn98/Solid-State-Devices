@@ -1,0 +1,34 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+model intrinsic_semiconductor(a,c):
+  inout a,c;
+  electrical a,c;
+  
+  parameter real q  = 1.6e-19; //electronic charge
+  parameter real un = 1500;  //mobility of electron
+  parameter real up = 500;  //mobility of hole
+  parameter real Nc = 2.8e19; //
+  parameter real Nv = 1e19; //
+  parameter real sqrt_Nc_Nv = 3.22e+15; //sqrt of NcNv/(T)^1.5
+  parameter real area=1e-8;
+  parameter real l=1e-3;
+  parameter real Eg = 1.12;  //band gap energy difference
+  parameter real k  = 1.38e-23;  //Boltzmann constant
+  parameter real Nd =1e+15;
+  
+analog begin
+    
+    if(V(a,c)>0) begin
+      real ni,T,sigma,n,p;
+      T=1000/V(a,c);
+      ni=sqrt_Nc_Nv*exp(-Eg/2*k*T)*pow(T,1.5);
+      n=Nd;
+      p=pow(ni,2)/Nd;
+      sigma=q*(n*un+p*up);
+      
+      I(a,c)<+sigma*A/l;
+      end
+      
+    end
+endmodule

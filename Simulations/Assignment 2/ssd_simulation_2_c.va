@@ -1,0 +1,47 @@
+`include "disciplines.vams"
+`include "constants.vams"
+
+module pn_diode (a, c);
+  inout a, c;
+  electrical a, c;
+
+  parameter real Vt   =   0.0259; // at T=300K
+  parameter real Eg = 1.12;  //band gap of the material
+  parameter real Nc = 2.9e+19;
+  parameter real Nv = 1e+19;
+  parameter real un = 1500;  //mobility
+  parameter real up = 500;
+  parameter real er = 11.9;  //relative permeability
+  parameter real tp = 1e-6;  //diffusion time constant for hole
+  parameter real A  = 1e-8;  //area of the pn_diode
+  parameter real T  = 300;  // temperature
+  parameter real eps = 8.85e-14; //permittivity constant
+  parameter real q  = 1.6e-19;  //charge
+  parameter real k  = 1.38e-23;  //boltzmann constant
+  parameter real Na = 1e+18;  //doping on p-side
+  parameter real Nd = 1e+16;  //doping on n-side
+  
+  
+analog begin
+    real ni,p_no,n_po,Dn,Dp,Ln,Lp,Io,Ior,W,I_diode,Vbi,tn;
+    tn=tp;  //diffusion time constant for hole
+    ni=pow(Nc*Nv,0.5)*pow((T/300),1.5)*exp(Eg/(2*k*T)); // variation of ni with temp
+    p_no=ni*ni/Nd;  // calculate minority carriers
+    n_po=ni*ni/Na;
+    Dn=un*Vt;  //calculate diffusivity
+    Dp=up*Vt;
+    Vbi=(k*T/q)*ln(Na*Nd/(ni*ni));  // built in potential
+    W=pow(2*eps*er*(Vbi-V(a,c))*((1/Na)+(1/Nd))/q,0.2); //depletion width
+    Ln=pow(Dn*tn,0.5); //calculate diffusion length
+    Lp=pow(Dp*tp,0.5);
+    Io=q*A*((Dp*p_no/Lp)+(Dn*n_po/Ln));// reverse saturation current
+    Ior=q*A*ni*W/(2*tp);
+    I_diode=Io*(exp(V(a,c)/Vt)-1)+Ior*(exp(V(a,x1)/(2*Vt))-1);  //total diode current
+    I(a,c)<+I_diode; //load diode to the circuit
+    
+  end
+  endmodule
+    
+    
+    
+  
